@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "418426167119",
+    "project_id": "tm-contractor-tracker",
+    "storage_bucket": "tm-contractor-tracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:418426167119:android:d5d1ad6e4dd6cccad0af3a",
+        "android_client_info": {
+          "package_name": "com.tm.contractor_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkuTAbgUAwvQTQNxTDvA6iRrK7iL5To_U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

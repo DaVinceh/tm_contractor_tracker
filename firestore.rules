@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isContractor() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'contractor';
+    }
+    
+    function isSO() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'so';
+    }
+    
+    function isExecutive() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'executive';
+    }
+    
+    function isGMorAGM() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'gmAgm';
+    }
+    
+    function isAdmin() {
+      return isSO() || isExecutive() || isGMorAGM();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Anyone authenticated can read user data
+      allow read: if isAuthenticated();
+      
+      // Users can update their own data
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Only admins can create users
+      allow create: if isAdmin();
+      
+      // Only admins can delete users
+      allow delete: if isAdmin();
+    }
+    
+    // Contractor teams collection
+    match /contractor_teams/{teamId} {
+      // Anyone authenticated can read teams
+      allow read: if isAuthenticated();
+      
+      // Only SO and above can create/update/delete teams
+      allow create, update, delete: if isSO() || isExecutive() || isGMorAGM();
+    }
+    
+    // Attendance collection
+    match /attendance/{attendanceId} {
+      // Contractors can read their own attendance
+      // SOs can read attendance for their teams
+      // Executives and GM/AGM can read all
+      allow read: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid ||
+        isSO() ||
+        isExecutive() ||
+        isGMorAGM()
+      );
+      
+      // Contractors can create their own attendance
+      allow create: if isContractor() && request.resource.data.user_id == request.auth.uid;
+      
+      // No updates or deletes to attendance records
+      allow update, delete: if false;
+    }
+    
+    // Tasks collection
+    match /tasks/{taskId} {
+      // Anyone authenticated can read tasks
+      allow read: if isAuthenticated();
+      
+      // Only SOs and above can create/update tasks
+      allow create, update: if isSO() || isExecutive() || isGMorAGM();
+      
+      // Only executives and GM/AGM can delete tasks
+      allow delete: if isExecutive() || isGMorAGM();
+    }
+    
+    // Task updates collection
+    match /task_updates/{updateId} {
+      // Anyone authenticated can read task updates
+      allow read: if isAuthenticated();
+      
+      // Contractors can create updates for tasks assigned to their team
+      allow create: if isContractor();
+      
+      // No updates or deletes to task updates
+      allow update, delete: if false;
+    }
+  }
+}

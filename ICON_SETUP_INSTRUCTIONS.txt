@@ -1,0 +1,41 @@
+APP ICON SETUP INSTRUCTIONS
+============================
+
+STEP 1: Save the Logo Image
+----------------------------
+1. Take the contractor tracker logo image (the one you provided)
+2. Save it as: c:\tm_contractor_tracker\assets\icons\app_icon.png
+3. Make sure it's a PNG file
+4. Recommended size: 1024x1024 pixels (or at least 512x512)
+
+STEP 2: Generate the Icons
+---------------------------
+After placing the image file, run this command in PowerShell:
+
+cd c:\tm_contractor_tracker
+flutter pub run flutter_launcher_icons
+
+This will automatically generate all required icon sizes for Android.
+
+STEP 3: Rebuild the APK
+------------------------
+After icons are generated, build a new APK:
+
+flutter build apk --release
+
+STEP 4: Install on Phone
+-------------------------
+The new APK will have the contractor tracker logo as the app icon!
+
+============================
+
+If you get an error about the image not found:
+- Double-check the file is at: assets\icons\app_icon.png
+- Make sure it's a valid PNG image
+- Try opening the image in an image viewer to verify it's not corrupted
+
+Current Configuration:
+- flutter_launcher_icons package: ADDED ✓
+- pubspec.yaml configured: ADDED ✓
+- Image path expected: assets/icons/app_icon.png
+- White background for adaptive icon: SET ✓
