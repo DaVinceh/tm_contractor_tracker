@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../providers/admin_provider.dart';
 import '../../models/contractor_team_model.dart';
 import '../../utils/theme.dart';
-import 'package:intl/intl.dart';
+import 'admin_task_detail_screen.dart';
 
 class TeamDetailScreen extends StatefulWidget {
   final ContractorTeam team;
@@ -329,76 +330,93 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
         final task = sortedTasks[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        task.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AdminTaskDetailScreen(task: task),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          task.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    _buildPriorityChip(task.priority ?? 'medium'),
-                    const SizedBox(width: 8),
-                    _buildStatusChip(task.status),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  task.description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppTheme.textSecondaryColor,
+                      _buildPriorityChip(task.priority ?? 'medium'),
+                      const SizedBox(width: 8),
+                      _buildStatusChip(task.status),
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: AppTheme.textSecondaryColor,
+                      ),
+                    ],
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                // Date range
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_today,
-                        size: 14, color: AppTheme.textSecondaryColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Start: ${DateFormat('dd/MM/yyyy').format(task.startDate)}',
-                      style: const TextStyle(
-                          fontSize: 12, color: AppTheme.textSecondaryColor),
+                  const SizedBox(height: 8),
+                  Text(
+                    task.description,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppTheme.textSecondaryColor,
                     ),
-                    if (task.endDate != null) ...[
-                      const SizedBox(width: 12),
-                      const Icon(Icons.event,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  // Date range
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today,
                           size: 14, color: AppTheme.textSecondaryColor),
                       const SizedBox(width: 4),
                       Text(
-                        'End: ${DateFormat('dd/MM/yyyy').format(task.endDate!)}',
+                        'Start: ${DateFormat('dd/MM/yyyy').format(task.startDate)}',
                         style: const TextStyle(
                             fontSize: 12, color: AppTheme.textSecondaryColor),
                       ),
+                      if (task.endDate != null) ...[
+                        const SizedBox(width: 12),
+                        const Icon(Icons.event,
+                            size: 14, color: AppTheme.textSecondaryColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          'End: ${DateFormat('dd/MM/yyyy').format(task.endDate!)}',
+                          style: const TextStyle(
+                              fontSize: 12, color: AppTheme.textSecondaryColor),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-                const SizedBox(height: 12),
-                LinearProgressIndicator(
-                  value: task.completionPercentage / 100,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    _getStatusColor(task.status),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${task.completionPercentage.toInt()}% Complete',
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  LinearProgressIndicator(
+                    value: task.completionPercentage / 100,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      _getStatusColor(task.status),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${task.completionPercentage.toInt()}% Complete',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
             ),
           ),
         );

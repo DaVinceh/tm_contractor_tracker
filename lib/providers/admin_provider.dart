@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
 import '../models/attendance_model.dart';
 import '../models/task_model.dart';
+import '../models/task_update_model.dart';
 import '../models/contractor_team_model.dart';
 
 class AdminProvider with ChangeNotifier {
@@ -15,6 +16,7 @@ class AdminProvider with ChangeNotifier {
   List<Attendance> _attendanceRecords = [];
   Map<String, List<Task>> _tasksByTeam = {};
   List<Task> _allTasks = [];
+  Map<String, List<TaskUpdate>> _taskUpdatesByTaskId = {};
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -23,6 +25,7 @@ class AdminProvider with ChangeNotifier {
   List<Attendance> get attendanceRecords => _attendanceRecords;
   Map<String, List<Task>> get tasksByTeam => _tasksByTeam;
   List<Task> get tasks => _allTasks;
+  Map<String, List<TaskUpdate>> get taskUpdatesByTaskId => _taskUpdatesByTaskId;
 
   Future<void> loadTeamsForSO(String soId) async {
     _isLoading = true;
@@ -217,7 +220,34 @@ class AdminProvider with ChangeNotifier {
       'total_tasks': totalTasks,
       'average_completion': avgCompletion,
       'attendance_rate': attendanceRate > 100 ? 100.0 : attendanceRate,
+      'attendance_last_30_days': recentAttendance,
     };
+  }
+
+  Future<void> loadTaskUpdates(String taskId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('task_updates')
+          .where('task_id', isEqualTo: taskId)
+          .orderBy('updated_at', descending: true)
+          .get();
+
+      final updates = snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return TaskUpdate.fromJson(data);
+      }).toList();
+
+      _taskUpdatesByTaskId[taskId] = updates;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  List<TaskUpdate> getTaskUpdates(String taskId) {
+    return _taskUpdatesByTaskId[taskId] ?? [];
   }
 
   void clearError() {

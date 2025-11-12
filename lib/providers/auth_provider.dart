@@ -28,26 +28,45 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Check if contractor team exists
-      final teamSnapshot = await _firestore
-          .collection('contractor_teams')
-          .where('team_id', isEqualTo: teamId)
-          .where('leader_name', isEqualTo: leaderName)
-          .limit(1)
-          .get();
+      // Convert to lowercase for case-insensitive comparison
+      final normalizedTeamId = teamId.trim().toLowerCase();
+      final normalizedLeaderName = leaderName.trim().toLowerCase();
 
-      if (teamSnapshot.docs.isEmpty) {
+      // Get all contractor teams and match case-insensitively
+      final allTeamsSnapshot =
+          await _firestore.collection('contractor_teams').get();
+
+      DocumentSnapshot? matchingTeamDoc;
+      String? actualTeamId;
+      String? actualLeaderName;
+
+      for (var doc in allTeamsSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final dbTeamId = (data['team_id'] as String? ?? '').toLowerCase();
+        final dbLeaderName =
+            (data['leader_name'] as String? ?? '').toLowerCase();
+
+        if (dbTeamId == normalizedTeamId &&
+            dbLeaderName == normalizedLeaderName) {
+          matchingTeamDoc = doc;
+          actualTeamId = data['team_id'] as String;
+          actualLeaderName = data['leader_name'] as String;
+          break;
+        }
+      }
+
+      if (matchingTeamDoc == null) {
         _errorMessage = 'Invalid Team ID or Leader Name';
         _isLoading = false;
         notifyListeners();
         return false;
       }
 
-      // Create or get contractor user
+      // Create or get contractor user with actual (original case) values
       final userSnapshot = await _firestore
           .collection('users')
-          .where('team_id', isEqualTo: teamId)
-          .where('name', isEqualTo: leaderName)
+          .where('team_id', isEqualTo: actualTeamId)
+          .where('name', isEqualTo: actualLeaderName)
           .limit(1)
           .get();
 
@@ -56,12 +75,12 @@ class AuthProvider with ChangeNotifier {
         userData['id'] = userSnapshot.docs.first.id;
         _currentUser = AppUser.fromJson(userData);
       } else {
-        // Create new contractor user
+        // Create new contractor user with actual (original case) values
         final newUserRef = await _firestore.collection('users').add({
-          'email': '${teamId}_$leaderName@contractor.tm',
+          'email': '${actualTeamId}_$actualLeaderName@contractor.tm',
           'role': 'contractor',
-          'name': leaderName,
-          'team_id': teamId,
+          'name': actualLeaderName,
+          'team_id': actualTeamId,
           'created_at': FieldValue.serverTimestamp(),
           'updated_at': FieldValue.serverTimestamp(),
         });
