@@ -82,3 +82,4 @@ app.*.map.json
 # Config files (contains sensitive data)
 # Uncomment if you want to keep config private
 # lib/config/supabase_config.dart
+.vercel
