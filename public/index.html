@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TM Contractor Tracker - Download</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .logo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease;
+        }
+
+        .download-section {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            margin: 30px 0;
+            color: white;
+        }
+
+        .download-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 20px 50px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .download-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .download-info {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .feature {
+            padding: 25px;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .feature p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .requirements {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .requirements h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .requirements ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .requirements li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .requirements li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: white;
+            opacity: 0.8;
+        }
+
+        .version {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .main-content {
+                padding: 25px;
+            }
+
+            .download-button {
+                padding: 15px 35px;
+                font-size: 1.1em;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="https://via.placeholder.com/150?text=conTRACKtor" alt="TM Contractor Tracker Logo">
+            </div>
+            <h1>🗺️ conTRACKtor</h1>
+            <p class="tagline">Professional Contractor Management & Tracking System</p>
+        </div>
+
+        <div class="main-content">
+            <div class="download-section">
+                <h2>📱 Download for Android</h2>
+                <a href="/downloads/app-release.apk" class="download-button" download>
+                    Download APK
+                </a>
+                <p class="download-info">Version 1.0.0 • Size: 24.5 MB • Android 5.0+</p>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">📍</div>
+                    <h3>GPS Check-In</h3>
+                    <p>Real-time location tracking for contractor attendance with map visualization</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">✅</div>
+                    <h3>Task Management</h3>
+                    <p>Assign, track, and complete tasks with progress updates and photo evidence</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>Performance Reports</h3>
+                    <p>Detailed analytics and reports with daily, weekly, and monthly insights</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">👥</div>
+                    <h3>Team Organization</h3>
+                    <p>Manage multiple contractor teams with hierarchical role-based access</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">📈</div>
+                    <h3>Excel Export</h3>
+                    <p>Export comprehensive reports to Excel for detailed analysis and sharing</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure & Reliable</h3>
+                    <p>Firebase-powered backend with robust authentication and data security</p>
+                </div>
+            </div>
+
+            <div class="requirements">
+                <h2>📋 System Requirements</h2>
+                <ul>
+                    <li>Android 5.0 (Lollipop) or higher</li>
+                    <li>Minimum 100 MB free storage space</li>
+                    <li>Internet connection for sync</li>
+                    <li>GPS/Location services enabled</li>
+                    <li>Camera permission for task photo updates</li>
+                </ul>
+            </div>
+
+            <div class="requirements">
+                <h2>🚀 Installation Instructions</h2>
+                <ul>
+                    <li>Download the APK file by clicking the button above</li>
+                    <li>Open the downloaded file on your Android device</li>
+                    <li>If prompted, enable "Install from Unknown Sources" in Settings</li>
+                    <li>Follow the on-screen installation instructions</li>
+                    <li>Launch the app and login with your credentials</li>
+                </ul>
+            </div>
+
+            <div class="requirements">
+                <h2>👤 User Roles</h2>
+                <ul>
+                    <li><strong>Contractor:</strong> Check-in, view tasks, update progress</li>
+                    <li><strong>Site Officer (SO):</strong> Manage teams, assign tasks, view attendance</li>
+                    <li><strong>Executive:</strong> Oversee multiple SOs, comprehensive reports</li>
+                    <li><strong>GM/AGM:</strong> Full system access, analytics, performance metrics</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 TM Contractor Tracker. All rights reserved.</p>
+            <div class="version">Version 1.0.0</div>
+            <p style="margin-top: 15px;">
+                <a href="/privacy-policy.html" style="color: white; margin: 0 10px;">Privacy Policy</a> •
+                <a href="mailto:support@tmcontractor.com" style="color: white; margin: 0 10px;">Support</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
