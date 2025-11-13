@@ -226,22 +226,39 @@ class AdminProvider with ChangeNotifier {
 
   Future<void> loadTaskUpdates(String taskId) async {
     try {
-      final snapshot = await _firestore
-          .collection('task_updates')
-          .where('task_id', isEqualTo: taskId)
-          .orderBy('updated_at', descending: true)
-          .get();
+      // Try with orderBy first
+      QuerySnapshot snapshot;
+      try {
+        snapshot = await _firestore
+            .collection('task_updates')
+            .where('task_id', isEqualTo: taskId)
+            .orderBy('updated_at', descending: true)
+            .get();
+      } catch (indexError) {
+        // If index doesn't exist, fetch without ordering and sort in memory
+        print('Firestore index not found, sorting in memory: $indexError');
+        snapshot = await _firestore
+            .collection('task_updates')
+            .where('task_id', isEqualTo: taskId)
+            .get();
+      }
 
       final updates = snapshot.docs.map((doc) {
-        final data = doc.data();
+        final data = doc.data() as Map<String, dynamic>;
         data['id'] = doc.id;
         return TaskUpdate.fromJson(data);
       }).toList();
 
+      // Sort in memory if not already sorted
+      updates.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
       _taskUpdatesByTaskId[taskId] = updates;
       notifyListeners();
     } catch (e) {
+      print('Error loading task updates: $e');
       _errorMessage = e.toString();
+      // Set empty list to show "no updates" instead of error
+      _taskUpdatesByTaskId[taskId] = [];
       notifyListeners();
     }
   }

@@ -24,7 +24,10 @@ class _AdminTaskDetailScreenState extends State<AdminTaskDetailScreen> {
 
   Future<void> _loadTaskUpdates() async {
     final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+    print('Loading task updates for task ID: ${widget.task.id}');
     await adminProvider.loadTaskUpdates(widget.task.id);
+    final updates = adminProvider.getTaskUpdates(widget.task.id);
+    print('Loaded ${updates.length} updates');
   }
 
   @override

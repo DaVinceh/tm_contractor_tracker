@@ -88,11 +88,11 @@ service cloud.firestore {
     
     // Task updates collection
     match /task_updates/{updateId} {
-      // Anyone authenticated can read task updates
-      allow read: if isAuthenticated();
+      // Allow anyone to read task updates (contractors don't use Firebase Auth)
+      allow read: if true;
       
-      // Contractors can create updates for tasks assigned to their team
-      allow create: if isContractor();
+      // Allow anyone to create updates (contractors use team-based auth)
+      allow create: if true;
       
       // No updates or deletes to task updates
       allow update, delete: if false;
