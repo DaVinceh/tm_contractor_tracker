@@ -33,14 +33,11 @@ service cloud.firestore {
     
     // Users collection
     match /users/{userId} {
-      // Anyone authenticated can read user data
-      allow read: if isAuthenticated();
+      // Allow anyone to read and create users (for contractor login)
+      allow read, create: if true;
       
-      // Users can update their own data
-      allow update: if isAuthenticated() && request.auth.uid == userId;
-      
-      // Only admins can create users
-      allow create: if isAdmin();
+      // Users can update their own data, or admins can update any
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
       
       // Only admins can delete users
       allow delete: if isAdmin();
@@ -48,8 +45,8 @@ service cloud.firestore {
     
     // Contractor teams collection
     match /contractor_teams/{teamId} {
-      // Anyone authenticated can read teams
-      allow read: if isAuthenticated();
+      // Allow anyone to read teams (contractors don't use Firebase Auth)
+      allow read: if true;
       
       // Only SO and above can create/update/delete teams
       allow create, update, delete: if isSO() || isExecutive() || isGMorAGM();
@@ -57,18 +54,8 @@ service cloud.firestore {
     
     // Attendance collection
     match /attendance/{attendanceId} {
-      // Contractors can read their own attendance
-      // SOs can read attendance for their teams
-      // Executives and GM/AGM can read all
-      allow read: if isAuthenticated() && (
-        resource.data.user_id == request.auth.uid ||
-        isSO() ||
-        isExecutive() ||
-        isGMorAGM()
-      );
-      
-      // Contractors can create their own attendance
-      allow create: if isContractor() && request.resource.data.user_id == request.auth.uid;
+      // Allow anyone to read and create attendance (contractors need access)
+      allow read, create: if true;
       
       // No updates or deletes to attendance records
       allow update, delete: if false;
@@ -76,8 +63,8 @@ service cloud.firestore {
     
     // Tasks collection
     match /tasks/{taskId} {
-      // Anyone authenticated can read tasks
-      allow read: if isAuthenticated();
+      // Allow anyone to read tasks (contractors need access)
+      allow read: if true;
       
       // Only SOs and above can create/update tasks
       allow create, update: if isSO() || isExecutive() || isGMorAGM();
