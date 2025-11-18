@@ -19,6 +19,8 @@ class Task {
   final String? program;
   final String? lorId;
   final String priority; // high, medium, low
+  final bool
+      isDeleted; // Soft delete flag - hidden from contractors but kept for SO records
 
   Task({
     required this.id,
@@ -39,6 +41,7 @@ class Task {
     this.program,
     this.lorId,
     this.priority = 'medium',
+    this.isDeleted = false,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -62,6 +65,7 @@ class Task {
       program: json['program'] as String?,
       lorId: json['lor_id'] as String?,
       priority: json['priority'] as String? ?? 'medium',
+      isDeleted: json['is_deleted'] as bool? ?? false,
     );
   }
 
@@ -96,6 +100,7 @@ class Task {
       'program': program,
       'lor_id': lorId,
       'priority': priority,
+      'is_deleted': isDeleted,
     };
   }
 }

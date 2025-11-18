@@ -162,6 +162,17 @@ class _SODashboardState extends State<SODashboard> {
                       children: [
                         Expanded(
                           child: _buildActionCard(
+                            'Task Management',
+                            Icons.task_alt,
+                            AppTheme.primaryColor,
+                            () {
+                              Navigator.pushNamed(context, '/task_management');
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildActionCard(
                             'Report Summary',
                             Icons.assessment,
                             AppTheme.accentColor,
@@ -170,7 +181,11 @@ class _SODashboardState extends State<SODashboard> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 12),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
                         Expanded(
                           child: _buildActionCard(
                             'Productivity',
@@ -181,6 +196,9 @@ class _SODashboardState extends State<SODashboard> {
                             },
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                            child: SizedBox()), // Empty space for balance
                       ],
                     ),
                     const SizedBox(height: 20),

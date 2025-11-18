@@ -32,6 +32,8 @@ class _ContractorDashboardState extends State<ContractorDashboard> {
     await contractorProvider.loadTodayAttendance(user.id);
     // Load tasks
     await contractorProvider.loadTasks(user.teamId!);
+    // Load notifications
+    await contractorProvider.loadNotifications(user.teamId!);
   }
 
   @override
@@ -44,6 +46,39 @@ class _ContractorDashboardState extends State<ContractorDashboard> {
       appBar: AppBar(
         title: const Text('Contractor Dashboard'),
         actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications),
+                onPressed: () => _showNotificationsDialog(),
+              ),
+              if (contractorProvider.unreadNotificationCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '${contractorProvider.unreadNotificationCount}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -481,5 +516,94 @@ class _ContractorDashboardState extends State<ContractorDashboard> {
       default:
         return Icons.radio_button_unchecked;
     }
+  }
+
+  void _showNotificationsDialog() {
+    final contractorProvider =
+        Provider.of<ContractorProvider>(context, listen: false);
+    final notifications = contractorProvider.notifications;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Notifications'),
+        content: notifications.isEmpty
+            ? const Padding(
+                padding: EdgeInsets.all(20),
+                child: Text('No notifications'),
+              )
+            : SizedBox(
+                width: double.maxFinite,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      color: notification.isRead
+                          ? null
+                          : AppTheme.primaryColor.withOpacity(0.1),
+                      child: ListTile(
+                        leading: Icon(
+                          notification.changeType == 'deleted'
+                              ? Icons.delete
+                              : notification.changeType == 'restored'
+                                  ? Icons.restore
+                                  : Icons.update,
+                          color: notification.changeType == 'deleted'
+                              ? AppTheme.errorColor
+                              : notification.changeType == 'restored'
+                                  ? AppTheme.successColor
+                                  : AppTheme.primaryColor,
+                        ),
+                        title: Text(
+                          notification.title,
+                          style: TextStyle(
+                            fontWeight: notification.isRead
+                                ? FontWeight.normal
+                                : FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(notification.message),
+                        trailing: !notification.isRead
+                            ? Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Colors.blue,
+                                  shape: BoxShape.circle,
+                                ),
+                              )
+                            : null,
+                        onTap: () async {
+                          // Mark as read
+                          await contractorProvider
+                              .markNotificationAsRead(notification.id);
+
+                          // Close dialog
+                          if (mounted) Navigator.pop(context);
+
+                          // Navigate to task list where the user can see the updated task
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TaskListScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 }

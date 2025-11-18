@@ -267,6 +267,193 @@ class AdminProvider with ChangeNotifier {
     return _taskUpdatesByTaskId[taskId] ?? [];
   }
 
+  // Task Management Methods for SO
+  Future<bool> createTask({
+    required String teamId,
+    required String title,
+    required String description,
+    required String priority,
+    required DateTime startDate,
+    DateTime? endDate,
+    required String createdBy,
+    String? lorId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _firestore.collection('tasks').add({
+        'team_id': teamId,
+        'title': title,
+        'description': description,
+        'priority': priority,
+        'start_date': Timestamp.fromDate(startDate),
+        'end_date': endDate != null ? Timestamp.fromDate(endDate) : null,
+        'completion_percentage': 0.0,
+        'status': 'pending',
+        'created_by': createdBy,
+        'created_at': FieldValue.serverTimestamp(),
+        'updated_at': FieldValue.serverTimestamp(),
+        'lor_id': lorId,
+        'is_deleted': false,
+      });
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updateTask({
+    required String taskId,
+    String? title,
+    String? description,
+    String? priority,
+    DateTime? startDate,
+    DateTime? endDate,
+    double? completionPercentage,
+    String? teamId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final updates = <String, dynamic>{
+        'updated_at': FieldValue.serverTimestamp(),
+      };
+
+      if (title != null) updates['title'] = title;
+      if (description != null) updates['description'] = description;
+      if (priority != null) updates['priority'] = priority;
+      if (startDate != null)
+        updates['start_date'] = Timestamp.fromDate(startDate);
+      if (endDate != null) updates['end_date'] = Timestamp.fromDate(endDate);
+      if (completionPercentage != null) {
+        updates['completion_percentage'] = completionPercentage;
+        updates['status'] =
+            completionPercentage >= 100 ? 'completed' : 'in_progress';
+      }
+
+      await _firestore.collection('tasks').doc(taskId).update(updates);
+
+      // Create notification for contractor if teamId is provided
+      if (teamId != null) {
+        await _createTaskNotification(
+          taskId: taskId,
+          teamId: teamId,
+          title: 'Task Updated',
+          message: 'Task has been updated by SO',
+          changeType: 'updated',
+          changes: updates,
+        );
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteTask(String taskId, String teamId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Soft delete - mark as deleted instead of removing
+      await _firestore.collection('tasks').doc(taskId).update({
+        'is_deleted': true,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+
+      // Create notification for contractor
+      await _createTaskNotification(
+        taskId: taskId,
+        teamId: teamId,
+        title: 'Task Removed',
+        message: 'This task has been removed',
+        changeType: 'deleted',
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> restoreTask(String taskId, String teamId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Restore task by setting is_deleted to false
+      await _firestore.collection('tasks').doc(taskId).update({
+        'is_deleted': false,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+
+      // Create notification for contractor
+      await _createTaskNotification(
+        taskId: taskId,
+        teamId: teamId,
+        title: 'Task Restored',
+        message: 'This task has been restored',
+        changeType: 'restored',
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> _createTaskNotification({
+    required String taskId,
+    required String teamId,
+    required String title,
+    required String message,
+    required String changeType,
+    Map<String, dynamic>? changes,
+  }) async {
+    try {
+      await _firestore.collection('task_notifications').add({
+        'task_id': taskId,
+        'team_id': teamId,
+        'title': title,
+        'message': message,
+        'change_type': changeType,
+        'changes': changes,
+        'created_at': FieldValue.serverTimestamp(),
+        'is_read': false,
+      });
+    } catch (e) {
+      print('Error creating notification: $e');
+    }
+  }
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();

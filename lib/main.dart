@@ -7,6 +7,7 @@ import 'providers/admin_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/admin/report_summary_screen.dart';
 import 'screens/admin/productivity_screen.dart';
+import 'screens/admin/task_management_screen.dart';
 import 'utils/theme.dart';
 
 void main() async {
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         home: const SplashScreen(),
         routes: {
+          '/task_management': (context) => const TaskManagementScreen(),
           '/report_summary': (context) => const ReportSummaryScreen(),
           '/productivity': (context) => const ProductivityScreen(),
         },

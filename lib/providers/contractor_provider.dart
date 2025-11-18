@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import '../models/attendance_model.dart';
 import '../models/task_model.dart';
 import '../models/task_update_model.dart';
+import '../models/task_notification_model.dart';
 
 class ContractorProvider with ChangeNotifier {
   final _firestore = FirebaseFirestore.instance;
@@ -15,6 +16,8 @@ class ContractorProvider with ChangeNotifier {
   Attendance? _todayAttendance;
   List<Task> _tasks = [];
   List<TaskUpdate> _taskUpdates = [];
+  List<TaskNotification> _notifications = [];
+  int _unreadNotificationCount = 0;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -22,6 +25,8 @@ class ContractorProvider with ChangeNotifier {
   List<Task> get tasks => _tasks;
   List<TaskUpdate> get taskUpdates => _taskUpdates;
   bool get hasCheckedInToday => _todayAttendance != null;
+  List<TaskNotification> get notifications => _notifications;
+  int get unreadNotificationCount => _unreadNotificationCount;
 
   Future<bool> checkIn(String userId, String teamId) async {
     _isLoading = true;
@@ -111,11 +116,14 @@ class ContractorProvider with ChangeNotifier {
           .where('team_id', isEqualTo: teamId)
           .get();
 
-      _tasks = snapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return Task.fromJson(data);
-      }).toList();
+      _tasks = snapshot.docs
+          .map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return Task.fromJson(data);
+          })
+          .where((task) => !task.isDeleted)
+          .toList(); // Filter out deleted tasks
 
       // Sort by start date in memory (no index required)
       _tasks.sort((a, b) => b.startDate.compareTo(a.startDate));
@@ -186,6 +194,77 @@ class ContractorProvider with ChangeNotifier {
       _errorMessage = e.toString();
       notifyListeners();
       return null;
+    }
+  }
+
+  Future<void> loadNotifications(String teamId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('task_notifications')
+          .where('team_id', isEqualTo: teamId)
+          .orderBy('created_at', descending: true)
+          .limit(50)
+          .get();
+
+      _notifications = snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return TaskNotification.fromJson(data);
+      }).toList();
+
+      _unreadNotificationCount = _notifications.where((n) => !n.isRead).length;
+      notifyListeners();
+    } catch (e) {
+      // If index doesn't exist, load without ordering
+      try {
+        final snapshot = await _firestore
+            .collection('task_notifications')
+            .where('team_id', isEqualTo: teamId)
+            .get();
+
+        _notifications = snapshot.docs.map((doc) {
+          final data = doc.data();
+          data['id'] = doc.id;
+          return TaskNotification.fromJson(data);
+        }).toList();
+
+        // Sort in memory
+        _notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        _unreadNotificationCount =
+            _notifications.where((n) => !n.isRead).length;
+        notifyListeners();
+      } catch (e2) {
+        print('Error loading notifications: $e2');
+      }
+    }
+  }
+
+  Future<void> markNotificationAsRead(String notificationId) async {
+    try {
+      await _firestore
+          .collection('task_notifications')
+          .doc(notificationId)
+          .update({'is_read': true});
+
+      final index = _notifications.indexWhere((n) => n.id == notificationId);
+      if (index != -1) {
+        _notifications[index] = TaskNotification(
+          id: _notifications[index].id,
+          taskId: _notifications[index].taskId,
+          teamId: _notifications[index].teamId,
+          title: _notifications[index].title,
+          message: _notifications[index].message,
+          changeType: _notifications[index].changeType,
+          changes: _notifications[index].changes,
+          createdAt: _notifications[index].createdAt,
+          isRead: true,
+        );
+        _unreadNotificationCount =
+            _notifications.where((n) => !n.isRead).length;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error marking notification as read: $e');
     }
   }
 

@@ -84,5 +84,20 @@ service cloud.firestore {
       // No updates or deletes to task updates
       allow update, delete: if false;
     }
+
+    // Task notifications collection
+    match /task_notifications/{notificationId} {
+      // Allow anyone to read notifications
+      allow read: if true;
+      
+      // Allow anyone to create notifications
+      allow create: if true;
+      
+      // Allow anyone to update (mark as read)
+      allow update: if true;
+      
+      // No deletes
+      allow delete: if false;
+    }
   }
 }
